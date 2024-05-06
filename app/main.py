@@ -1,6 +1,6 @@
 from flask import Flask
-from app.apis.internal_user import bp as internal_user_bp
 
+from app.apis.internal_user import bp as internal_user_bp
 
 app = Flask(__name__)
 

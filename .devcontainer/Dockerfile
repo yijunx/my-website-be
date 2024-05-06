@@ -23,7 +23,8 @@ RUN apt-get update && \
     pip install --upgrade pip && \
     pip install --upgrade poetry && \
     echo ${DOCKER_USER} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${DOCKER_USER} && \
-    chmod 0440 /etc/sudoers.d/${DOCKER_USER}
+    chmod 0440 /etc/sudoers.d/${DOCKER_USER} && \
+    poetry config virtualenvs.create false
 
 # Setup env
 RUN mkdir ${DOCKER_HOME}/.ssh && \
