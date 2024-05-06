@@ -1,5 +1,6 @@
 from flask import Blueprint
 
+
 bp = Blueprint("internal_user", __name__)
 
 

@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     SERVICE_NAME: Optional[str] = None
     SERVICE_VERSION: Optional[str] = "0.0.1"
 
+    LOGIN_SESSION_LASTS_IN_SECONDS: Optional[int] = 8 * 60 * 60
+
 
 class DevSettings(Settings):
     model_config = SettingsConfigDict(env_file="config/dev.env", extra="ignore")

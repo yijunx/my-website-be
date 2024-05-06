@@ -3,18 +3,25 @@ from typing import Protocol
 import jwt
 
 from app.models.exceptions.base import CustomError
-from app.models.schemas.user import User
+from app.models.schemas.user import UserFromIDToken
 
 
 class IdpIDTokenParser(Protocol):
     @staticmethod
-    def parse(payload: dict) -> User: ...
+    def parse(payload: dict) -> UserFromIDToken: ...
 
 
 class GCPIDTokenParser(IdpIDTokenParser):
     @staticmethod
-    def parse(payload: dict) -> User:
-        return User(**payload)
+    def parse(payload: dict) -> UserFromIDToken:
+        return UserFromIDToken(
+            name=payload["name"],
+            first_name=payload["given_name"],
+            last_name=payload["family_name"],
+            provider="google",
+            provider_account_id=payload["sub"],
+            email=payload["email"],
+        )
 
 
 def get_parser(iss: str) -> IdpIDTokenParser:
@@ -25,7 +32,7 @@ def get_parser(iss: str) -> IdpIDTokenParser:
     return parser
 
 
-def get_user_from_id_token(token: str) -> User:
+def get_user_from_id_token(token: str) -> UserFromIDToken:
     payload = jwt.decode(token, options={"verify_signature": False})
     parser = get_parser(iss=payload["iss"])
     return parser.parse(payload=payload)
