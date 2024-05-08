@@ -1,7 +1,7 @@
 from app.models.schemas.user import UserFromIDToken
+from app.repositories.user import SqlAlchemyUserRepo
 from app.services.user import UserService
 from app.utils.db import get_db
-from app.repositories.user import SqlAlchemyUserRepo
 
 
 def test_login_and_authenticate(user_from_id_token: UserFromIDToken):

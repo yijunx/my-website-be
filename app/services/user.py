@@ -15,12 +15,10 @@ class MockUserService(UserServiceInterface):
     def __init__(self, login_session_id: str, user_id: str) -> None:
         self.login_session_id = login_session_id
         self.user_id = user_id
-        
+
     def login(self, user: UserFromIDToken) -> LoginSession:
         return LoginSession(
-            id=self.login_session_id,
-            user_id=self.user_id,
-            expires=datetime.now()
+            id=self.login_session_id, user_id=self.user_id, expires=datetime.now()
         )
 
     def authenticate(self, login_session_id: str) -> User:
@@ -30,7 +28,7 @@ class MockUserService(UserServiceInterface):
             email="user_email",
             role="reader",
             created_at=datetime.now(),
-            updated_at=datetime.now()
+            updated_at=datetime.now(),
         )
 
 

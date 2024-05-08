@@ -15,9 +15,6 @@ from app.models.sqlalchemy import (
 
 
 class UserRepoInterface(Protocol):
-    def __init__(self, db) -> None:
-        """here db can be session for sqlalchery, collection for pymongo"""
-
     def upsert_user(self, user_from_id_token: UserFromIDToken) -> UserORM: ...
     def get_user(self, user_id: str) -> UserORM: ...
     def upsert_account(

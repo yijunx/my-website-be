@@ -8,7 +8,7 @@ from app.utils.process_response import create_response
 from app.utils.request_helper import get_token_from_request
 from app.utils.service_registration import ServiceEnum
 
-bp = Blueprint("internal_user", __name__)
+bp = Blueprint("internal_user", __name__, url_prefix="/api/internal_user/v1")
 
 
 @bp.route("/login", methods=["POST"])

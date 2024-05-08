@@ -21,6 +21,7 @@ def register_services_func(
     app: Flask, user_service: UserServiceInterface | None
 ) -> None:
     """here you can replace any service with service for test!"""
+
     def f(session: Session) -> UserServiceInterface:
         # user service
         if user_service:

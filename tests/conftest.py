@@ -1,21 +1,29 @@
 import jwt
 import pytest
 
-from app.models.schemas.user import UserFromIDToken
-from app.utils.idp_helper import get_user_from_id_token
 from app.main import create_app
+from app.models.schemas.user import UserFromIDToken
 from app.services.user import MockUserService
+from app.utils.idp_helper import get_user_from_id_token
 
 
 @pytest.fixture
-def client():
+def user_id():
+    return "zxcv"
 
-    
-    app = create_app()
+
+@pytest.fixture
+def login_session_id():
+    return "1234"
+
+
+@pytest.fixture
+def client(user_id: str, login_session_id: str):
+    app = create_app(
+        user_service=MockUserService(login_session_id=login_session_id, user_id=user_id)
+    )
     with app.test_client() as c:
         yield c
-
-
 
 
 @pytest.fixture
@@ -44,4 +52,6 @@ def user_from_id_token(fake_gcp_idtoken) -> UserFromIDToken:
     return get_user_from_id_token(fake_gcp_idtoken)
 
 
-
+@pytest.fixture
+def headers_with_id_token(fake_gcp_idtoken):
+    return {"Authorization": f"Bearer {fake_gcp_idtoken}"}

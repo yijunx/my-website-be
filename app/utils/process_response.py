@@ -7,6 +7,11 @@ from flask import make_response
 from pydantic import BaseModel
 
 
+class ResponseModel[T](BaseModel):
+    payload: Optional[T] = None
+    message: Optional[str] = None
+
+
 def create_response(
     response: BaseModel = None,
     message: str = None,
@@ -22,8 +27,12 @@ def create_response(
     and set headers in the response
     so that browser may react accordingly
     """
+    # if response is None:
+    #     r = CustomResponse(message=message)
+    # else:
+    r = ResponseModel[type(response)](payload=response, message=message)
     resp = make_response(
-        {"data": response.model_dump_json(), "message": message},
+        r.model_dump(),
         status_code,
     )
     resp.headers["charset"] = "utf-8"
@@ -47,5 +56,11 @@ if __name__ == "__main__":
         job: Optional[str] = None
         created_at: datetime
 
-    data = Item(name="tom", created_at=datetime.now(timezone.utc))
-    print(data.model_dump_json())
+    item = Item(name="tom", created_at=datetime.now(timezone.utc))
+    c = ResponseModel[type(item)](payload=item, message="nihao")
+    item = None
+    d = ResponseModel[type(item)]()
+    # -> {'payload': {'name': 'tom', 'job': None, 'created_at': datetime.datetime(2024, 5, 8, 9, 48, 5, 124428, tzinfo=datetime.timezone.utc)}, 'message': 'nihao'}
+    # -> {'payload': None, 'message': None}
+    print(c.model_dump())
+    print(d.model_dump())
