@@ -32,7 +32,3 @@ class User(BaseModel):
     role: UserRoleEnum
     created_at: datetime
     updated_at: datetime
-
-
-
-

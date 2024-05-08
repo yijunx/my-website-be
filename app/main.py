@@ -1,11 +1,16 @@
 from flask import Flask
 
+
 from app.apis.internal_user import bp as internal_user_bp
+from app.services.user import UserServiceInterface
+from app.utils.service_registration import register_services_func
 
-app = Flask(__name__)
+
+def create_app(user_service: UserServiceInterface = None):
+    a = Flask(__name__)
+    register_services_func(app=a, user_service=user_service)
+    a.register_blueprint(internal_user_bp, url_prefix="/api/internal_user/v1")
+    return a
 
 
-def create_app():
-    app = Flask(__name__)
-    app.register_blueprint(internal_user_bp, url_prefix="/apis/internal_user/v1")
-    return app
+app = create_app()

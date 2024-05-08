@@ -1,7 +1,21 @@
 import jwt
 import pytest
+
 from app.models.schemas.user import UserFromIDToken
 from app.utils.idp_helper import get_user_from_id_token
+from app.main import create_app
+from app.services.user import MockUserService
+
+
+@pytest.fixture
+def client():
+
+    
+    app = create_app()
+    with app.test_client() as c:
+        yield c
+
+
 
 
 @pytest.fixture
@@ -25,7 +39,9 @@ def fake_gcp_idtoken() -> str:
     return jwt.encode(payload=payload, key="verysecure")
 
 
-
 @pytest.fixture
 def user_from_id_token(fake_gcp_idtoken) -> UserFromIDToken:
     return get_user_from_id_token(fake_gcp_idtoken)
+
+
+
