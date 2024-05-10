@@ -1,4 +1,5 @@
 import uuid
+from abc import ABC, abstractmethod
 from datetime import datetime, timedelta, timezone
 from typing import Protocol
 
@@ -14,15 +15,20 @@ from app.models.sqlalchemy import (
 )
 
 
-class UserRepoInterface(Protocol):
+class UserRepoInterface(ABC):
+    @abstractmethod
     def upsert_user(self, user_from_id_token: UserFromIDToken) -> UserORM: ...
+    @abstractmethod
     def get_user(self, user_id: str) -> UserORM: ...
+    @abstractmethod
     def upsert_account(
         self, user_from_id_token: UserFromIDToken, user_id: str
     ) -> AccountORM: ...
+    @abstractmethod
     def create_login_session(
         self, user_id: str, login_session_lasts_in_seconds: int
     ) -> LoginSessionORM: ...
+    @abstractmethod
     def get_session(self, login_session_id: str) -> LoginSessionORM: ...
 
 

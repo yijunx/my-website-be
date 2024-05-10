@@ -14,15 +14,9 @@ def create_app(user_service: UserServiceInterface = None):
     return a
 
 
-
-
-
 if __name__ == "__main__":
     app = create_app()
     for rule in app.url_map.iter_rules():
-        print(rule.endpoint) # internal_user.get_latest_alive_session
-        print(rule.rule) # /api/internal_user/v1/sessions/<session_id>
-        print(rule.methods) # {'HEAD', 'GET', 'OPTIONS'}
-
-
-
+        print(rule.endpoint)  # internal_user.get_latest_alive_session
+        print(rule.rule)  # /api/internal_user/v1/sessions/<session_id>
+        print(rule.methods)  # {'HEAD', 'GET', 'OPTIONS'}

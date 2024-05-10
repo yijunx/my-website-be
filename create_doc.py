@@ -30,6 +30,7 @@ TEMPLATE = """
   </style>
 </head>
 <body>
+<h3>all JSON response will be wrapped in payload field with message like {"payload": {...}, "message": "hey"}</h3>
 <div id="swagger-ui"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.24.2/swagger-ui-bundle.js"> </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.24.2/swagger-ui-standalone-preset.js"> </script>

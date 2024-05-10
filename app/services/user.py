@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Protocol
 
@@ -6,8 +7,10 @@ from app.repositories.user import UserRepoInterface
 from app.utils.config import configurations
 
 
-class UserServiceInterface(Protocol):
+class UserServiceInterface(ABC):
+    @abstractmethod
     def login(self, user: UserFromIDToken) -> LoginSession: ...
+    @abstractmethod
     def authenticate(self, login_session_id: str) -> User: ...
 
 

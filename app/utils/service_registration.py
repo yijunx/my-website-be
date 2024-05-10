@@ -3,12 +3,8 @@ from enum import Enum
 from flask import Flask
 from sqlalchemy.orm import Session
 
-from app.repositories.user import SqlAlchemyUserRepo, UserRepoInterface
+from app.repositories.user import SqlAlchemyUserRepo
 from app.services.user import UserService, UserServiceInterface
-
-# class ServiceRegistration:
-#     def __init__(self, user_service: UserServiceInterface) -> None:
-#         self.user_service = user_service
 
 
 class ServiceEnum(str, Enum):

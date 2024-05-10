@@ -1,12 +1,12 @@
-from functools import wraps
-from typing import Any, Callable, Iterable, List, Optional, Tuple, Type, Union
-
-from flask import Flask, current_app, jsonify, make_response, request
-from pydantic import BaseModel, ValidationError, TypeAdapter, RootModel
-
-from app.utils.process_response import create_response, ResponseModel
 import inspect
+from functools import wraps
+from typing import Callable
+
+from flask import Flask, request
+from pydantic import ValidationError
+
 from app.utils.config import configurations
+from app.utils.process_response import ResponseModel, create_response
 
 
 def validate():
@@ -15,25 +15,29 @@ def validate():
         def wrapper(*args, **kwargs):
             b_model = func.__annotations__.get("body")
             q_model = func.__annotations__.get("query")
+            r_model = func.__annotations__.get("response")
+            # we can do the same for the form..
 
             if b_model:
                 try:
                     kwargs["body"] = b_model(**request.get_json())
                 except ValidationError as e:
-                    return create_response(
-                        status_code=400, message=str(e)
-                    )
-            
+                    return create_response(status_code=400, message=str(e))
+
             if q_model:
                 try:
                     kwargs["query"] = q_model(**request.args)
                 except ValidationError as e:
-                    return create_response(
-                        status_code=400, message=str(e)
-                    )
+                    return create_response(status_code=400, message=str(e))
+            if r_model:
+                # here acutally we can validate the result of
+                # func(*args, **kwargs)
+                kwargs["response"] = r_model
 
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorate
 
 
@@ -54,7 +58,9 @@ def get_summary_desc(func) -> tuple[str, str]:
 
 
 def get_schema(t) -> dict:
-    return ResponseModel[t].model_json_schema(ref_template="#/components/schemas/{model}")
+    return ResponseModel[t].model_json_schema(
+        ref_template="#/components/schemas/{model}"
+    )
 
 
 def generate_spec(app: Flask):
@@ -95,12 +101,11 @@ def generate_spec(app: Flask):
             params = []
             # path, parameters = parse_url(str(rule))
 
-
             spec = {
                 "summary": summary,
                 "description": desc,
                 "operationId": func.__name__ + "__" + method.lower(),
-                "tags": ["All Endpoints"],
+                "tags": ["AllEndpoints"],
             }
 
             if b_model:
@@ -108,27 +113,31 @@ def generate_spec(app: Flask):
                 spec["requestBody"] = {
                     "content": {
                         "application/json": {
-                            "schema": {"$ref": f"#/components/schemas/{b_model.__name__}"}
+                            "schema": {
+                                "$ref": f"#/components/schemas/{b_model.__name__}"
+                            }
                         }
                     }
                 }
             if q_model:
                 nested_schemas[q_model.__name__] = get_schema(q_model)
-                params.append({
-                    "name": q_model.__name__,
-                    "in": "query",
-                    "required": True,
-                    "schema": {
-                        "$ref": f"#/components/schemas/{q_model.__name__}",
-                    },
-                })
+                params.append(
+                    {
+                        "name": q_model.__name__,
+                        "in": "query",
+                        "required": True,
+                        "schema": {
+                            "$ref": f"#/components/schemas/{q_model.__name__}",
+                        },
+                    }
+                )
 
             spec["parameters"] = params
             spec["responses"] = {}
 
             if r_model:
                 nested_schemas[r_model.__name__] = get_schema(r_model)
-                spec["responses"]["200"] = {
+                spec["responses"]["20X"] = {
                     "description": "Successful Response",
                     "content": {
                         "application/json": {
@@ -140,16 +149,15 @@ def generate_spec(app: Flask):
                 }
 
             routes[rule.rule][method.lower()] = spec
-    real_schemas = {}
+    unpacked_schemas = {}
     for _, model in nested_schemas.items():
         if "$defs" in model:
             for key, value in model["$defs"].items():
                 # print(f"Adding {value} to {key}")
-                real_schemas[key] = value
-            del model["$defs"]
+                unpacked_schemas[key] = value
 
     components = {
-        "schemas": real_schemas,
+        "schemas": unpacked_schemas,
         # "securitySchemes": {
         #     "bearerAuth": {
         #         "type": "http",
@@ -160,20 +168,18 @@ def generate_spec(app: Flask):
     }
     data = {
         "openapi": "3.0.2",
-        "info": {"service_name": configurations.SERVICE_NAME, "service_version": configurations.SERVICE_VERSION},
-        "tags": [{"name": "All Endpoints"}],
+        "info": {
+            "service_name": configurations.SERVICE_NAME,
+            "service_version": configurations.SERVICE_VERSION,
+        },
         "paths": {**routes},
         "components": components,
     }
     return data
 
+
 if __name__ == "__main__":
     from app.main import create_app
+
     d = generate_spec(create_app())
     print(d)
-
-
-
-
-            
-

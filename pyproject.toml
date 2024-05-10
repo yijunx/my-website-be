@@ -7,14 +7,14 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-pydantic = {extras = ["dotenv"], version = "^2.7.1"}
 pydantic-settings = "^2.2.1"
 alembic = "^1.13.1"
 psycopg2 = "^2.9.9"
 gunicorn = "^22.0.0"
 sqlalchemy = "^2.0.29"
-flask-pydantic = "^0.12.0"
 pyjwt = {extras = ["crypto"], version = "^2.8.0"}
+flask = "^3.0.3"
+pydantic = "^2.7.1"
 
 
 [tool.poetry.group.dev.dependencies]
