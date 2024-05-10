@@ -32,7 +32,7 @@ RUN --mount=type=ssh,id=bitbucket \
     poetry install --without dev --no-interaction && \
     rm poetry.lock pyproject.toml
 
-ENV PATH "$PATH:/opt/ucare/.local/bin"
+ENV PATH "$PATH:/opt/yijun/.local/bin"
 
 USER ${DOCKER_USER}
 

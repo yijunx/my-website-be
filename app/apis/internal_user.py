@@ -7,6 +7,10 @@ from app.utils.idp_helper import get_user_from_id_token
 from app.utils.process_response import create_response
 from app.utils.request_helper import get_token_from_request
 from app.utils.service_registration import ServiceEnum
+from app.utils.openapi import validate
+
+from app.models.schemas.user import User
+
 
 bp = Blueprint("internal_user", __name__, url_prefix="/api/internal_user/v1")
 
@@ -24,7 +28,10 @@ def login():
         return create_response(status_code=e.status_code, message=e.message)
 
 
-@bp.route("/session", methods=["GET"])
-def get_latest_alive_session():
+
+
+@bp.route("/sessions/<session_id>", methods=["GET"])
+@validate()
+def get_latest_alive_session(body: User, query: User, response: User):
     # email in the query parameter
-    ...
+    return {"upu": 1}, 200

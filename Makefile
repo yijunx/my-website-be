@@ -16,3 +16,6 @@ format:
 	@isort tests/
 	@black app/
 	@black tests/
+
+doc:
+	@python create_doc.py > my_website_be.html
