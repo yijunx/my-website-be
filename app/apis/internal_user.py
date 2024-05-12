@@ -1,7 +1,7 @@
 from flask import Blueprint, current_app, request
 
 from app.models.exceptions.base import CustomError
-from app.models.schemas.user import User, LoginSession
+from app.models.schemas.user import LoginSession, User
 from app.services.user import UserServiceInterface
 from app.utils.db import get_db
 from app.utils.idp_helper import get_user_from_id_token
@@ -17,7 +17,7 @@ bp = Blueprint("internal_user", __name__, url_prefix="/api/internal_user/v1")
 @openapi()
 def login(response: LoginSession):
     """frontend pls pass the id token from idp as the bear token in authorization header
-    
+
     returns a login session
     """
     user = get_user_from_id_token(get_token_from_request(request))
@@ -29,4 +29,3 @@ def login(response: LoginSession):
         return create_response(response=p)
     except CustomError as e:
         return create_response(status_code=e.status_code, message=e.message)
-

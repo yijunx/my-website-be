@@ -13,6 +13,7 @@ def create_app(user_service: UserServiceInterface = None):
     a.register_blueprint(post_bp)
     return a
 
+
 # app = create_app()
 
 if __name__ == "__main__":

@@ -8,7 +8,6 @@ from pydantic import ValidationError
 from app.utils.config import configurations
 from app.utils.process_response import ResponseModel, create_response
 
-
 PARAM = "param"
 JSON_BODY = "body"
 RESPONSE = "response"
@@ -16,6 +15,7 @@ RESPONSE = "response"
 
 def openapi():
     """validate and openapi"""
+
     def decorate(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):

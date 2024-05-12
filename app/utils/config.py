@@ -14,6 +14,8 @@ class Settings(BaseSettings):
 
     LOGIN_SESSION_LASTS_IN_SECONDS: Optional[int] = 8 * 60 * 60
 
+    MASTER_ACC_EMAIL: str
+
 
 class DevSettings(Settings):
     model_config = SettingsConfigDict(env_file="config/dev.env", extra="ignore")

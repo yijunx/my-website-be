@@ -90,4 +90,4 @@ class UserService(UserServiceInterface):
     ) -> PaginatedResponse[User]:
         if actor.role != UserRoleEnum.admin:
             raise CustomError(status_code=403, message="unauthorized")
-        return self.user_repo.list_users(query=query_param)
+        return self.user_repo.list_users(param=query_param)

@@ -24,8 +24,24 @@ class GCPIDTokenParser(IdpIDTokenParser):
         )
 
 
+class MockIDTokenParser(IdpIDTokenParser):
+    @staticmethod
+    def parse(payload: dict) -> UserFromIDToken:
+        return UserFromIDToken(
+            name=payload["name"],
+            first_name=payload["given_name"],
+            last_name=payload["family_name"],
+            provider="geegle",
+            provider_account_id=payload["sub"],
+            email=payload["email"],
+        )
+
+
 def get_parser(iss: str) -> IdpIDTokenParser:
-    parser_dict = {"https://accounts.google.com": GCPIDTokenParser()}
+    parser_dict = {
+        "https://accounts.geegle.com": MockIDTokenParser(),
+        "https://accounts.google.com": GCPIDTokenParser(),
+    }
     parser = parser_dict.get(iss, None)
     if parser is None:
         raise CustomError(status_code=400, message=f"{iss} not accepted for login yet")

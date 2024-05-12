@@ -23,6 +23,7 @@ from app.models.sqlalchemy import (
     VerificationTokenORM,
 )
 from app.repositories.util import translate_query_pagination
+from app.utils.config import configurations
 
 
 class UserRepoInterface(ABC):
@@ -41,7 +42,7 @@ class UserRepoInterface(ABC):
     @abstractmethod
     def get_login_session(self, login_session_id: str) -> LoginSession: ...
     @abstractmethod
-    def list_users(self, query: UserGetParam) -> PaginatedResponse[User]: ...
+    def list_users(self, param: UserGetParam) -> PaginatedResponse[User]: ...
 
 
 class SqlAlchemyUserRepo(UserRepoInterface):
@@ -78,7 +79,10 @@ class SqlAlchemyUserRepo(UserRepoInterface):
     def get_user(self, user_id: str) -> User:
         db_user: UserORM = self.db.query(UserORM).filter(UserORM.id == user_id).first()
         if db_user:
-            return User.model_validate(db_user, from_attributes=True)
+            u = User.model_validate(db_user, from_attributes=True)
+            if u.email == configurations.MASTER_ACC_EMAIL:
+                u.role = UserRoleEnum.admin
+            return u
         else:
             CustomError(status_code=404, message="User does not exist")
 
