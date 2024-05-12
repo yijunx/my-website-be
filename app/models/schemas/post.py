@@ -1,5 +1,5 @@
-
 from pydantic import BaseModel
+
 from app.models.schemas.util import CustomDateTime
 
 

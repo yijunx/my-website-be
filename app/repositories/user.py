@@ -1,35 +1,47 @@
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta, timezone
-from typing import Protocol
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.exceptions.base import CustomError
-from app.models.schemas.user import UserFromIDToken, UserRoleEnum
+from app.models.schemas.user import (
+    Account,
+    LoginSession,
+    User,
+    UserFromIDToken,
+    UserGetParam,
+    UserPatchPayload,
+    UserRoleEnum,
+)
+from app.models.schemas.util import PaginatedResponse
 from app.models.sqlalchemy import (
     AccountORM,
     LoginSessionORM,
     UserORM,
     VerificationTokenORM,
 )
+from app.repositories.util import translate_query_pagination
 
 
 class UserRepoInterface(ABC):
     @abstractmethod
-    def upsert_user(self, user_from_id_token: UserFromIDToken) -> UserORM: ...
+    def upsert_user(self, user_from_id_token: UserFromIDToken) -> User: ...
     @abstractmethod
-    def get_user(self, user_id: str) -> UserORM: ...
+    def get_user(self, user_id: str) -> User: ...
     @abstractmethod
     def upsert_account(
         self, user_from_id_token: UserFromIDToken, user_id: str
-    ) -> AccountORM: ...
+    ) -> Account: ...
     @abstractmethod
     def create_login_session(
         self, user_id: str, login_session_lasts_in_seconds: int
-    ) -> LoginSessionORM: ...
+    ) -> LoginSession: ...
     @abstractmethod
-    def get_session(self, login_session_id: str) -> LoginSessionORM: ...
+    def get_login_session(self, login_session_id: str) -> LoginSession: ...
+    @abstractmethod
+    def list_users(self, query: UserGetParam) -> PaginatedResponse[User]: ...
 
 
 class SqlAlchemyUserRepo(UserRepoInterface):
@@ -61,12 +73,12 @@ class SqlAlchemyUserRepo(UserRepoInterface):
                 updated_at=datetime.now(timezone.utc),
             )
             self.db.add(db_user)
-        return db_user
+        return User.model_validate(db_user, from_attributes=True)
 
-    def get_user(self, user_id: str) -> UserORM:
+    def get_user(self, user_id: str) -> User:
         db_user: UserORM = self.db.query(UserORM).filter(UserORM.id == user_id).first()
         if db_user:
-            return db_user
+            return User.model_validate(db_user, from_attributes=True)
         else:
             CustomError(status_code=404, message="User does not exist")
 
@@ -93,7 +105,7 @@ class SqlAlchemyUserRepo(UserRepoInterface):
                 provider=user_from_id_token.provider,
                 provider_account_id=user_from_id_token.provider_account_id,
             )
-        return db_account
+        return Account.model_validate(db_account, from_attributes=True)
 
     def create_login_session(
         self, user_id: str, login_session_lasts_in_seconds: int
@@ -105,9 +117,9 @@ class SqlAlchemyUserRepo(UserRepoInterface):
             + timedelta(seconds=login_session_lasts_in_seconds),
         )
         self.db.add(db_login_session)
-        return db_login_session
+        return LoginSession.model_validate(db_login_session, from_attributes=True)
 
-    def get_session(self, login_session_id: str) -> LoginSessionORM:
+    def get_login_session(self, login_session_id: str) -> LoginSessionORM:
         """for check login status..."""
         db_login_session = (
             self.db.query(LoginSessionORM)
@@ -116,6 +128,27 @@ class SqlAlchemyUserRepo(UserRepoInterface):
         )
 
         if db_login_session:
-            return db_login_session
+            return LoginSession.model_validate(db_login_session, from_attributes=True)
         else:
             raise CustomError(status_code=401, message="You did not login")
+
+    def list_users(self, param: UserGetParam) -> PaginatedResponse[User]:
+        query = self.db.query(UserORM)
+
+        if param.email:
+            # email for exact match..
+            query = query.filter(UserORM.email == param.email)
+        else:
+            if param.name:
+                query = query.filter(UserORM.name.ilike(f"%{param.name}%"))
+
+        total = query.count()
+        limit, offset, paging = translate_query_pagination(
+            total=total, query_param=param
+        )
+        db_items = query.limit(limit).offset(offset)
+
+        return PaginatedResponse[User](
+            data=[User.model_validate(x, from_attributes=True) for x in db_items],
+            paging=paging,
+        )

@@ -18,6 +18,13 @@ def get_token_from_cookie(request: Request):
     return token
 
 
+def get_session_id_from_custom_header(request: Request):
+    session_id: str = request.headers.get("X-Session-Id", None)
+    if session_id is None:
+        raise CustomError(status_code=401, message="unauthorized")
+    return session_id
+
+
 def get_auth_header(request: Request) -> str:
     try:
         auth_header = request.headers["authorization"]
@@ -40,9 +47,3 @@ def get_token_from_request(
             raise CustomError(401, "failed to get token")
 
     return token
-
-
-def request_validation(request: Request, params=None, body=None): ...
-
-
-def request_validation_with_authorization(request: Request, params=None, body=None): ...

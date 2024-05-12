@@ -3,7 +3,7 @@ from flask.testing import FlaskClient
 from app.models.schemas.user import LoginSession
 
 
-def test_clinic_user1_trigger_epac_but_fail(
+def test_login(
     client: FlaskClient,
     headers_with_id_token: dict,
     user_id: str,

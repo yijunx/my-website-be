@@ -9,30 +9,36 @@ from app.utils.config import configurations
 from app.utils.process_response import ResponseModel, create_response
 
 
-def validate():
+PARAM = "param"
+JSON_BODY = "body"
+RESPONSE = "response"
+
+
+def openapi():
+    """validate and openapi"""
     def decorate(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
-            b_model = func.__annotations__.get("body")
-            q_model = func.__annotations__.get("query")
-            r_model = func.__annotations__.get("response")
+            b_model = func.__annotations__.get(JSON_BODY)
+            q_model = func.__annotations__.get(PARAM)
+            r_model = func.__annotations__.get(RESPONSE)
             # we can do the same for the form..
 
             if b_model:
                 try:
-                    kwargs["body"] = b_model(**request.get_json())
+                    kwargs[JSON_BODY] = b_model(**request.get_json())
                 except ValidationError as e:
                     return create_response(status_code=400, message=str(e))
 
             if q_model:
                 try:
-                    kwargs["query"] = q_model(**request.args)
+                    kwargs[PARAM] = q_model(**request.args)
                 except ValidationError as e:
                     return create_response(status_code=400, message=str(e))
             if r_model:
                 # here acutally we can validate the result of
                 # func(*args, **kwargs)
-                kwargs["response"] = r_model
+                kwargs[RESPONSE] = r_model
 
             return func(*args, **kwargs)
 
@@ -74,9 +80,9 @@ def generate_spec(app: Flask):
             continue
         func = app.view_functions[rule.endpoint]
         # get the models
-        b_model = func.__annotations__.get("body")
-        q_model = func.__annotations__.get("query")
-        r_model = func.__annotations__.get("response")
+        b_model = func.__annotations__.get(JSON_BODY)
+        q_model = func.__annotations__.get(PARAM)
+        r_model = func.__annotations__.get(RESPONSE)
         # try:
         #     r_model = func.__response # added by the validate..
         # except:

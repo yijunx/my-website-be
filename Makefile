@@ -4,7 +4,7 @@ migrate:
 up:
 	@alembic upgrade head
 	@echo "starting"
-	@gunicorn app.patched:app --worker-class gevent -w 1 -b 0.0.0.0:8000 
+	@gunicorn 'app.main:create_app()'  -w 1 -b 0.0.0.0:8000  # --worker-class gevent
 
 test:
 	@alembic upgrade head

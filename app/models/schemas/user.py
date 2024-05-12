@@ -1,7 +1,9 @@
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
-from app.models.schemas.util import CustomDateTime
+
+from app.models.schemas.util import CustomDateTime, PageParam, PageResponse
 
 
 class UserRoleEnum(str, Enum):
@@ -15,6 +17,13 @@ class UserFromIDToken(BaseModel):
     email: str
     first_name: str
     last_name: str
+    provider: str
+    provider_account_id: str
+
+
+class Account(BaseModel):
+    id: str
+    user_id: str
     provider: str
     provider_account_id: str
 
@@ -34,5 +43,10 @@ class User(BaseModel):
     updated_at: CustomDateTime
 
 
-class UserPatch(BaseModel):
+class UserPatchPayload(BaseModel):
     role: UserRoleEnum
+
+
+class UserGetParam(PageParam):
+    name: Optional[str] = None
+    email: Optional[str] = None

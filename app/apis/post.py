@@ -4,12 +4,12 @@
 from flask import Blueprint
 
 from app.models.schemas.post import Post
-from app.utils.openapi import validate
+from app.utils.openapi import openapi
 
 bp = Blueprint("post", __name__, url_prefix="/api/post-service/v1/posts")
 
 
 @bp.route("", methods=["POST"])
-@validate()
+@openapi()
 def add_post(response: Post):
     return "hihi"
