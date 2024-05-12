@@ -1,7 +1,7 @@
-from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, field_serializer
+from pydantic import BaseModel
+from app.models.schemas.util import CustomDateTime
 
 
 class UserRoleEnum(str, Enum):
@@ -22,14 +22,7 @@ class UserFromIDToken(BaseModel):
 class LoginSession(BaseModel):
     id: str
     user_id: str
-    expires: datetime
-
-    @field_serializer("expires")
-    def serialize_dt(self, dt: datetime):
-        iso_datetime = dt.isoformat()
-        if not iso_datetime.endswith("+00:00"):
-            iso_datetime = iso_datetime + "+00:00"
-        return iso_datetime
+    expires: CustomDateTime
 
 
 class User(BaseModel):
@@ -37,5 +30,9 @@ class User(BaseModel):
     name: str
     email: str
     role: UserRoleEnum
-    created_at: datetime
-    updated_at: datetime
+    created_at: CustomDateTime
+    updated_at: CustomDateTime
+
+
+class UserPatch(BaseModel):
+    role: UserRoleEnum

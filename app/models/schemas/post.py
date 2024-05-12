@@ -1,14 +1,11 @@
-from datetime import datetime
-from enum import Enum
 
-from flask import Blueprint, current_app, request
-from pydantic import BaseModel, field_serializer
-
-from app.models.schemas.user import User
+from pydantic import BaseModel
+from app.models.schemas.util import CustomDateTime
 
 
 class Post(BaseModel):
     name: str
     content: str
-    creator: User
-    created_at: datetime
+    created_by: str
+    created_at: CustomDateTime
+    updated_at: CustomDateTime
