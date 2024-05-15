@@ -33,6 +33,8 @@ def create_response(
         status_code,
     )
     resp.headers["charset"] = "utf-8"
+    if True:  #TODO set it to dev or stg env check pls
+        resp.headers["Access-Control-Allow-Origin"] = "localhost:3000"
     if headers:
         for k, v in headers.items():
             resp.headers[k] = v

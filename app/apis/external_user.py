@@ -8,7 +8,7 @@ from app.utils.db import get_db
 from app.utils.idp_helper import get_user_from_id_token
 from app.utils.openapi import openapi
 from app.utils.process_response import create_response
-from app.utils.request_helper import get_session_id_from_custom_header
+from app.utils.request_helper import get_session_id_from_request
 from app.utils.service_registration import ServiceEnum
 
 bp = Blueprint("internal_user", __name__, url_prefix="/api/external_user/v1/users")
@@ -17,7 +17,7 @@ bp = Blueprint("internal_user", __name__, url_prefix="/api/external_user/v1/user
 @bp.route("", methods=["GET"])
 @openapi()
 def get_users(query: UserGetParam, response: PaginatedResponse[User]):
-    session_id = get_session_id_from_custom_header(request=request)
+    session_id = get_session_id_from_request(request=request)
     try:
         with get_db() as db:
             s: UserServiceInterface = current_app.config[ServiceEnum.USER_SERVICE](db)

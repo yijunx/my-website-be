@@ -18,7 +18,7 @@ def get_token_from_cookie(request: Request):
     return token
 
 
-def get_session_id_from_custom_header(request: Request):
+def get_session_id_from_request(request: Request):
     session_id: str = request.headers.get("X-Session-Id", None)
     if session_id is None:
         raise CustomError(status_code=401, message="unauthorized")
