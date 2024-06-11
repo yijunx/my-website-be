@@ -25,7 +25,7 @@ def login(response: LoginSession):
         with get_db() as db:
             # here we start a unit of work!
             s: UserServiceInterface = current_app.config[ServiceEnum.USER_SERVICE](db)
-            p = s.login(user=user)
+            p = s.login(user_from_id_token=user)
         return create_response(response=p)
     except CustomError as e:
         return create_response(status_code=e.status_code, message=e.message)

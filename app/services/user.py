@@ -16,7 +16,7 @@ from app.utils.config import configurations
 
 class UserServiceInterface(ABC):
     @abstractmethod
-    def login(self, user: UserFromIDToken) -> LoginSession:
+    def login(self, user_from_id_token: UserFromIDToken) -> LoginSession:
         """from the id token from idp, return a login session"""
 
     @abstractmethod
@@ -43,7 +43,7 @@ class MockUserService(UserServiceInterface):
             updated_at=datetime.now(),
         )
 
-    def login(self, user: UserFromIDToken) -> LoginSession:
+    def login(self, user_from_id_token: UserFromIDToken) -> LoginSession:
         return LoginSession(
             id=self.login_session_id, user_id=self.user_id, expires=datetime.now()
         )

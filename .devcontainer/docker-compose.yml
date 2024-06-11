@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  app:
+  user-backend:
     build: 
       context: ..
       dockerfile: .devcontainer/Dockerfile
@@ -15,6 +15,8 @@ services:
       - 8006:8000
     depends_on:
       - db
+    networks:
+      - my-website
 
   db:
     image: postgres:14
@@ -24,6 +26,12 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=db
+    networks:
+      - my-website
+
+networks:
+  my-website:
+    external: true
 
 
 
