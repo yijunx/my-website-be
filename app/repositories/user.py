@@ -49,7 +49,7 @@ class SqlAlchemyUserRepo(UserRepoInterface):
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def upsert_user(self, user_from_id_token: UserFromIDToken) -> UserORM:
+    def upsert_user(self, user_from_id_token: UserFromIDToken) -> User:
         """used by the login endpoint, login endpoint will get the
         id token from the idp. the frontend nextjs app should already
         verified the idtoken. thus the idtoken here must be legit.
