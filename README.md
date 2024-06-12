@@ -15,9 +15,11 @@ a monolith one.. not going to be too complicated
 * poetry init
 * install stuff
 
+    first:
+    `poetry init`
+
     normal stuff:
     `poetry add xxxx` or `poetry add -G dev xxxx`
-
 
     install using git from private repo through ssh (just example pasted from poetry)
 
