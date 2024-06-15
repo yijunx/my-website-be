@@ -11,5 +11,11 @@ bp = Blueprint("post", __name__, url_prefix="/api/post-service/v1/posts")
 
 @bp.route("", methods=["POST"])
 @openapi()
-def add_post(response: Post):
+def create_post(response: Post):
+    return "hihi"
+
+
+@bp.route("", methods=["GET"])
+@openapi()
+def get_posts(response: Post):
     return "hihi"
