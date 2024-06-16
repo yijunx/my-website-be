@@ -10,14 +10,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: just-a-test
+
+    - name: trigger-my-jenkins
+      env: # Or as an environment variable
+        JENKINSUSERNAME: ${{ secrets.JENKINSUSERNAME }}
+        JENKINSPASSWORD: ${{ secrets.JENKINSPASSWORD }}
+        BRANCH: ${{ github.ref_name }}
       run: | 
-        echo the branch is ${{ github.ref_name }}
-        echo the repo is ${{ github.repository }}
-    # - name: Triger jenkins
-    #   run: |
-    #     curl  -X POST "https://<JENKINS_URL>/buildByToken/buildWithParameters?" \
-    #           --data "token=<AUTHENTICATION_TOKEN>" \
-    #           --data "job=<JOB_NAME>" \
-    #           --data "param_name1=param_value1"
-    #           --data "param_name2=param_value2"
+        echo the branch is ${BRANCH} and jenkins username is ${JENKINSUSERNAME}
+        curl  --user ${JENKINSUSERNAME}:${JENKINSPASSWORD} "https://jenkins.giraffoxy.info/job/my-website-be/buildWithParameters?token=lalalahjahaha&BRANCH=${BRANCH}"
