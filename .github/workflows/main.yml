@@ -21,6 +21,6 @@ jobs:
         GIT_REPO: ${{ github.repository }}
       run: | 
         echo the branch is ${BRANCH} and repo is ${REPO}
-        curl -g \
+        curl \
         --user ${JENKINSUSERNAME}:${JENKINSPASSWORD} \
         "https://${JENKINSDOMAIN}/job/generic-service-auto/buildWithParameters?token=${JENKINSPIPELINETOKEN}&BRANCH=${BRANCH}&GIT_REPO=${GIT_REPO}"
