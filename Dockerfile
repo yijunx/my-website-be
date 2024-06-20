@@ -1,28 +1,29 @@
-FROM ubuntu:22.04
+FROM ubuntu:jammy-20230816
 
 ARG DOCKER_HOME="/opt/yijun"
-ARG DOCKER_CODE="/opt/yijun/code"
-ARG DOCKER_GROUP="yijun"
+ARG DOCKER_CODE="/opt/ucare/code"
 ARG DOCKER_USER="yijun"
 ARG DOCKER_UID=5000
+ARG PYTHON_VER=3.10.12
 
-WORKDIR ${DOCKER_CODE}
 
-RUN groupadd -g ${DOCKER_UID} ${DOCKER_GROUP} \
-    && useradd -r -u ${DOCKER_UID} -g ${DOCKER_GROUP} -d ${DOCKER_HOME} ${DOCKER_USER} \
-    && chown -R ${DOCKER_USER}:${DOCKER_GROUP} ${DOCKER_HOME}
+ARG BUILD_DEPS="wget build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev"
 
-RUN echo ${DOCKER_USER} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${DOCKER_USER} && \
-    chmod 0440 /etc/sudoers.d/${DOCKER_USER}
+RUN apt-get upgrade -y && apt-get install -y $BUILD_DEPS && apt-get install -y libpq-dev libbz2-dev openssh-client git sudo
 
-# Install git if there are stuff needs to install from git
-RUN mkdir ${DOCKER_HOME}/.ssh && \
-    chown -R ${DOCKER_USER} ${DOCKER_HOME}/.ssh && \
-    apt-get update && apt-get install -y --fix-missing curl openssh-client git sudo && \
-    ssh-keyscan bitbucket.org >> ${DOCKER_HOME}/.ssh/known_hosts && \
-    echo "alias docker='sudo docker'" > ${DOCKER_HOME}/.bashrc
+# Install Python
+RUN wget https://www.python.org/ftp/python/$PYTHON_VER/Python-$PYTHON_VER.tgz && \
+    tar xzf Python-$PYTHON_VER.tgz && cd Python-$PYTHON_VER && \
+    ./configure --enable-optimizations && \
+    make altinstall && \
+    ln -sf /usr/local/bin/python3.10 /usr/local/bin/python && \
+    rm -rf /Python-$PYTHON_VER.tgz /Python-$PYTHON_VER
+RUN wget https://bootstrap.pypa.io/get-pip.py && \
+    python get-pip.py && rm get-pip.py
 
-COPY poetry.lock pyproject.toml ./
+RUN useradd -d ${DOCKER_HOME} -m -U -u ${DOCKER_UID} ${DOCKER_USER}
+
+RUN sudo -H pip install poetry
 
 RUN --mount=type=ssh,id=private_key \
     mkdir -p /root/.ssh && \
@@ -32,14 +33,16 @@ RUN --mount=type=ssh,id=private_key \
     poetry install --without dev --no-interaction && \
     rm poetry.lock pyproject.toml
 
-ENV PATH "$PATH:/opt/yijun/.local/bin"
+RUN apt-get purge -y $BUILD_DEPS
 
 USER ${DOCKER_USER}
+
+WORKDIR ${DOCKER_CODE}
 
 ENV PYTHONPATH=.
 ENV PORT=8000
 ENV HOST=0.0.0.0
-ENV WORKER_NUM=1
+ENV WORKER_NUM=3
 
 COPY --chown=${DOCKER_USER} . .
 
