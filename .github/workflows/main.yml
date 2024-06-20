@@ -18,8 +18,9 @@ jobs:
         JENKINSDOMAIN: ${{ secrets.JENKINSDOMAIN }}
         JENKINSPIPELINETOKEN: ${{ secrets.JENKINSPIPELINETOKEN }}
         BRANCH: ${{ github.ref_name }}
+        REPO: ${{ github.repository }}
       run: | 
-        echo the branch is ${BRANCH} and jenkins username is ${JENKINSUSERNAME}
+        echo the branch is ${BRANCH} and repo is ${REPO}
         curl \
         --user ${JENKINSUSERNAME}:${JENKINSPASSWORD} \
-        "https://${JENKINSDOMAIN}/job/my-website-be/buildWithParameters?token=${JENKINSPIPELINETOKEN}&BRANCH=${BRANCH}"
+        "https://${JENKINSDOMAIN}/job/generic-service-auto/buildWithParameters?token=${JENKINSPIPELINETOKEN}&BRANCH=${BRANCH}&REPO=${REPO}"
