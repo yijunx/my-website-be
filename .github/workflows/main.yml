@@ -20,7 +20,7 @@ jobs:
         BRANCH: ${{ github.ref_name }}
         GIT_REPO: ${{ github.repository }}
       run: | 
-        echo the branch is ${BRANCH} and repo is ${REPO}
+        echo the branch is ${BRANCH} and repo is ${GIT_REPO}
         curl \
         --user ${JENKINSUSERNAME}:${JENKINSPASSWORD} \
-        "https://${JENKINSDOMAIN}/job/generic-service-auto/buildWithParameters?token=${JENKINSPIPELINETOKEN}&BRANCH=${BRANCH}&GIT_REPO=${GIT_REPO}"
+        "https://${JENKINSDOMAIN}/job/generic-service-auto/buildWithParameters?token=${JENKINSPIPELINETOKEN}&BRANCH=${BRANCH}&GIT_REPO=${GIT_REPO}&SERVICE_NAME=SAME_AS_REPO"
