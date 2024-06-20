@@ -10,7 +10,7 @@ ARG BUILD_DEPS="wget build-essential zlib1g-dev libncurses5-dev libgdbm-dev libn
 
 RUN apt-get upgrade -y && apt-get install -y $BUILD_DEPS && apt-get install -y libpq-dev libbz2-dev openssh-client git sudo
 
-Install Python
+# Install Python
 RUN wget https://www.python.org/ftp/python/$PYTHON_VER/Python-$PYTHON_VER.tgz && \
     tar xzf Python-$PYTHON_VER.tgz && cd Python-$PYTHON_VER && \
     ./configure --enable-optimizations && \
