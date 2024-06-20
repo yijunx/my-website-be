@@ -4,11 +4,11 @@ ARG DOCKER_HOME="/opt/yijun"
 ARG DOCKER_CODE="/opt/yijun/code"
 ARG DOCKER_USER="yijun"
 ARG DOCKER_UID=5000
-ARG PYTHON_VER=3.10.12
+ARG PYTHON_VER=3.12.4
 
 ARG BUILD_DEPS="wget build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev"
 
-RUN apt-get upgrade -y && apt-get install -y $BUILD_DEPS && apt-get install -y libpq-dev libbz2-dev openssh-client git sudo
+RUN apt-get update && apt-get install -y $BUILD_DEPS && apt-get install -y libpq-dev libbz2-dev openssh-client git sudo
 
 # Install Python
 RUN wget https://www.python.org/ftp/python/$PYTHON_VER/Python-$PYTHON_VER.tgz && \
@@ -23,6 +23,8 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
 RUN useradd -d ${DOCKER_HOME} -m -U -u ${DOCKER_UID} ${DOCKER_USER}
 
 RUN sudo -H pip install poetry
+COPY pyproject.toml pyproject.toml
+COPY poetry.lock poetry.lock
 
 RUN --mount=type=ssh,id=private_key \
     mkdir -p /root/.ssh && \
@@ -34,7 +36,6 @@ RUN --mount=type=ssh,id=private_key \
 
 RUN apt-get purge -y $BUILD_DEPS
 
-USER ${DOCKER_USER}
 
 WORKDIR ${DOCKER_CODE}
 
