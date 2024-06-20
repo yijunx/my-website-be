@@ -24,9 +24,9 @@ RUN mkdir ${DOCKER_HOME}/.ssh && \
 
 COPY poetry.lock pyproject.toml ./
 
-RUN --mount=type=ssh,id=bitbucket \
+RUN --mount=type=ssh,id=private_key \
     mkdir -p /root/.ssh && \
-    ssh-keyscan bitbucket.org >> /root/.ssh/known_hosts && \
+    ssh-keyscan github.com >> /root/.ssh/known_hosts && \
     poetry config virtualenvs.create false && \
     poetry config installer.max-workers 6 && \
     poetry install --without dev --no-interaction && \
