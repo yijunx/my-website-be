@@ -1,8 +1,11 @@
+import os
 import re
 
 from flask import Request
+from myauth import Actor, AuthSettings, authenticate_token
 
 from app.models.exceptions.base import CustomError
+from app.utils.config import configurations
 
 
 def get_token_from_header(auth_header: str) -> str:
@@ -47,3 +50,22 @@ def get_token_from_request(
             raise CustomError(401, "failed to get token")
 
     return token
+
+
+def get_actor_from_request(request: Request) -> Actor:
+
+    token = get_token_from_request(request=request, check_token_from_cookie=False)
+    auth_settings = AuthSettings(**configurations.model_dump())
+    verify_signature = True
+    if os.getenv("ENV"):
+        verify_signature = True
+    else:
+        verify_signature = False
+
+    try:
+        return authenticate_token(
+            token=token, config=auth_settings, verify_signature=verify_signature
+        )
+    except Exception as e:
+        print(e)
+        raise CustomError(401, "Authentication failed.")

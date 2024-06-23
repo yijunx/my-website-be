@@ -31,7 +31,7 @@ RUN --mount=type=ssh,id=private_key \
     poetry install --without dev --no-interaction && \
     rm poetry.lock pyproject.toml
 
-ENV PATH "$PATH:/opt/ucare/.local/bin"
+ENV PATH "$PATH:/opt/nihao/.local/bin"
  
 USER ${DOCKER_USER}
 

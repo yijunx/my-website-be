@@ -15,6 +15,7 @@ sqlalchemy = "^2.0.29"
 pyjwt = {extras = ["crypto"], version = "^2.8.0"}
 flask = "^3.0.3"
 pydantic = "^2.7.1"
+myauth = {git = "git@github.com:yijunx/auth", rev = "0.0.1"}
 
 
 [tool.poetry.group.dev.dependencies]

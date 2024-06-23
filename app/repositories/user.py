@@ -1,46 +1,24 @@
 import uuid
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
+from myauth import Actor
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.exceptions.base import CustomError
-from app.models.schemas.user import (
-    Account,
-    LoginSession,
-    User,
-    UserFromIDToken,
-    UserGetParam,
-    UserPatchPayload,
-    UserRoleEnum,
-)
+from app.models.schemas.user import User, UserGetParam, UserRoleEnum, Wink
 from app.models.schemas.util import PaginatedResponse
-from app.models.sqlalchemy import (
-    AccountORM,
-    LoginSessionORM,
-    UserORM,
-    VerificationTokenORM,
-)
+from app.models.sqlalchemy import UserORM
 from app.repositories.util import translate_query_pagination
 from app.utils.config import configurations
 
 
 class UserRepoInterface(ABC):
     @abstractmethod
-    def upsert_user(self, user_from_id_token: UserFromIDToken) -> User: ...
+    def upsert_user(self, actor: Actor) -> User: ...
     @abstractmethod
     def get_user(self, user_id: str) -> User: ...
-    @abstractmethod
-    def upsert_account(
-        self, user_from_id_token: UserFromIDToken, user_id: str
-    ) -> Account: ...
-    @abstractmethod
-    def create_login_session(
-        self, user_id: str, login_session_lasts_in_seconds: int
-    ) -> LoginSession: ...
-    @abstractmethod
-    def get_login_session(self, login_session_id: str) -> LoginSession: ...
     @abstractmethod
     def list_users(self, param: UserGetParam) -> PaginatedResponse[User]: ...
 
@@ -49,92 +27,50 @@ class SqlAlchemyUserRepo(UserRepoInterface):
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def upsert_user(self, user_from_id_token: UserFromIDToken) -> User:
+    def upsert_user(self, actor: Actor) -> Wink:
         """used by the login endpoint, login endpoint will get the
         id token from the idp. the frontend nextjs app should already
         verified the idtoken. thus the idtoken here must be legit.
         """
         db_user: UserORM = (
-            self.db.query(UserORM)
-            .filter(UserORM.email == user_from_id_token.email)
-            .first()
+            self.db.query(UserORM).filter(UserORM.email == actor.email).first()
         )
 
         if db_user:
-            # if the db_user exists
-            # do the modification if needed
-            pass
+            role = db_user.role
+            previous_login_at = db_user.last_login_at
+            # update stuff
+            db_user.last_login_at = datetime.now(timezone.utc)
+            db_user.realm = actor.iss.split("/")[-1]
+            print("db user exist!!")
         else:
+            previous_login_at = None
+            role = UserRoleEnum.reader
             db_user = UserORM(
-                id=str(uuid.uuid4()),
-                name=user_from_id_token.name,
-                email=user_from_id_token.email,
-                role=UserRoleEnum.reader,
+                id=actor.id,
+                name=actor.name,
+                email=actor.email,
+                role=role,
                 created_at=datetime.now(timezone.utc),
                 updated_at=datetime.now(timezone.utc),
+                last_login_at=datetime.now(timezone.utc),
+                realm=actor.iss.split("/")[-1],
             )
             self.db.add(db_user)
-        return User.model_validate(db_user, from_attributes=True)
+            print("db user added!!")
+
+        if actor.email == configurations.MASTER_ACC_EMAIL:
+            role = UserRoleEnum.admin
+        return Wink(
+            last_login_at=previous_login_at, role=role, realm=actor.iss.split("/")[-1]
+        )
 
     def get_user(self, user_id: str) -> User:
         db_user: UserORM = self.db.query(UserORM).filter(UserORM.id == user_id).first()
         if db_user:
-            u = User.model_validate(db_user, from_attributes=True)
-            if u.email == configurations.MASTER_ACC_EMAIL:
-                u.role = UserRoleEnum.admin
-            return u
+            return User.model_validate(db_user, from_attributes=True)
         else:
-            CustomError(status_code=404, message="User does not exist")
-
-    def upsert_account(
-        self, user_from_id_token: UserFromIDToken, user_id: str
-    ) -> AccountORM:
-
-        db_account: AccountORM = (
-            self.db.query(AccountORM)
-            .filter(
-                AccountORM.provider == user_from_id_token.provider,
-                AccountORM.provider_account_id
-                == user_from_id_token.provider_account_id,
-            )
-            .first()
-        )
-
-        if db_account:
-            pass
-        else:
-            db_account = AccountORM(
-                id=str(uuid.uuid4()),
-                user_id=user_id,
-                provider=user_from_id_token.provider,
-                provider_account_id=user_from_id_token.provider_account_id,
-            )
-        return Account.model_validate(db_account, from_attributes=True)
-
-    def create_login_session(
-        self, user_id: str, login_session_lasts_in_seconds: int
-    ) -> LoginSessionORM:
-        db_login_session = LoginSessionORM(
-            id=str(uuid.uuid4()),
-            user_id=user_id,
-            expires=datetime.now(timezone.utc)
-            + timedelta(seconds=login_session_lasts_in_seconds),
-        )
-        self.db.add(db_login_session)
-        return LoginSession.model_validate(db_login_session, from_attributes=True)
-
-    def get_login_session(self, login_session_id: str) -> LoginSessionORM:
-        """for check login status..."""
-        db_login_session = (
-            self.db.query(LoginSessionORM)
-            .filter(LoginSessionORM.id == login_session_id)
-            .first()
-        )
-
-        if db_login_session:
-            return LoginSession.model_validate(db_login_session, from_attributes=True)
-        else:
-            raise CustomError(status_code=401, message="You did not login")
+            raise CustomError(status_code=404, message="User does not exist")
 
     def list_users(self, param: UserGetParam) -> PaginatedResponse[User]:
         query = self.db.query(UserORM)

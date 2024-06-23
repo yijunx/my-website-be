@@ -11,10 +11,13 @@ class Settings(BaseSettings):
     # well here optional really needs Optional!!
     SERVICE_NAME: Optional[str] = None
     SERVICE_VERSION: Optional[str] = "0.0.1"
-
-    LOGIN_SESSION_LASTS_IN_SECONDS: Optional[int] = 8 * 60 * 60
-
     MASTER_ACC_EMAIL: str
+
+    # keycloak stuff
+    JWT_ISSUER: str
+    JWT_JWKS_URI: str
+    JWT_ALGORITHM: str
+    JWT_AUDIENCE: str
 
 
 class DevSettings(Settings):

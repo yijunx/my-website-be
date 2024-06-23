@@ -12,28 +12,6 @@ class UserRoleEnum(str, Enum):
     admin = "admin"
 
 
-class UserFromIDToken(BaseModel):
-    name: str
-    email: str
-    first_name: str
-    last_name: str
-    provider: str
-    provider_account_id: str
-
-
-class Account(BaseModel):
-    id: str
-    user_id: str
-    provider: str
-    provider_account_id: str
-
-
-class LoginSession(BaseModel):
-    id: str
-    user_id: str
-    expires: CustomDateTime
-
-
 class User(BaseModel):
     id: str
     name: str
@@ -50,3 +28,9 @@ class UserPatchPayload(BaseModel):
 class UserGetParam(PageParam):
     name: Optional[str] = None
     email: Optional[str] = None
+
+
+class Wink(BaseModel):
+    last_login_at: Optional[CustomDateTime] = None
+    role: UserRoleEnum
+    realm: str
